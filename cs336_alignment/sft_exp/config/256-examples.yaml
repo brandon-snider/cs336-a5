@@ -1,0 +1,5 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/sft-experiment/256-examples
+
+training:
+  max_unique_examples: 256

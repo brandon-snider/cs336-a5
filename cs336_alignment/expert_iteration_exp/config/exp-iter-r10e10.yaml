@@ -1,0 +1,13 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/expert-iteration-exp/exp-iter-r10e10
+
+training:
+  ei_rollouts_per_question: 10
+  sft_epochs_per_batch: 10
+
+  # # Experimental config
+  # ei_rollouts_per_question: 5
+  # sft_epochs_per_batch: 5
+  # ei_batch_size: 128
+  # eval_before_training: false
+  # eval_n_examples: 500

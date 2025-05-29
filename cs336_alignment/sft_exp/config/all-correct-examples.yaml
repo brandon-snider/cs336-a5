@@ -1,0 +1,5 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/sft-experiment/all-correct-examples
+
+training:
+  correct_only: True

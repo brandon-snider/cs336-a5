@@ -1,18 +1,21 @@
-[project]
+ad[project]
 name = "alignment"
 version = "1.0.0"
 description = "CS 336 Spring 2025 Assignment 5: Alignment"
 readme = "README.md"
-requires-python = ">=3.11,<3.13"  # Python 3.13 not yet supported for some deps
+requires-python = "==3.12.*"
 dependencies = [
     "accelerate>=1.5.2",
     "alpaca-eval",
+    "antlr4-python3-runtime==4.9.3",
     "flash-attn==2.7.4.post1",
     "jupyter>=1.1.1",
-    "math-verify[antlr4-13-2]>=0.7.0",
+    "math-verify>=0.7.0",
     "pylatexenc==2.10",
     "notebook>=7.4.2",
+    "omegaconf>=2.3.0",
     "pytest>=8.3.5",
+    "submitit>=1.5.3",
     "torch",
     "tqdm>=4.67.1",
     "transformers>=4.50.0",

@@ -992,9 +992,10 @@ def extract_answer(passage: str) -> str:
 def grade(model_answer: str, gt_answer: str, fast: bool = True):
     if "\\boxed" in gt_answer:
         gt_answer = extract_answer(gt_answer)
-    correct = grade_answer_mathd(model_answer, gt_answer) or grade_answer_sympy(
-        model_answer, gt_answer
-    )
+    # correct = grade_answer_mathd(model_answer, gt_answer) or grade_answer_sympy(
+    #     model_answer, gt_answer
+    # )
+    correct = grade_answer_mathd(model_answer, gt_answer)
     if not fast:
         # This mode further uses math_verify to recall originally false positives.
         # Will be a bit slower, and sensitive to bad inputs.

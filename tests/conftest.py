@@ -12,7 +12,12 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 def pytest_addoption(parser):
-    parser.addoption("--snapshot-exact", action="store_true", help="Use exact matching standards for snapshot matching")
+    parser.addoption(
+        "--snapshot-exact",
+        action="store_true",
+        help="Use exact matching standards for snapshot matching",
+    )
+
 
 _A = TypeVar("_A", np.ndarray, Tensor)
 
@@ -59,19 +64,25 @@ class NumpySnapshot:
         arrays_dict = actual if isinstance(actual, dict) else {"array": actual}
         arrays_dict = {k: _canonicalize_array(v) for k, v in arrays_dict.items()}
 
-
         # Load the snapshot
         expected_arrays = dict(np.load(snapshot_path))
+
+        # print("Expected arrays:")
+        # print(expected_arrays)
 
         # Verify all expected arrays are present
         missing_keys = set(arrays_dict.keys()) - set(expected_arrays.keys())
         if missing_keys:
-            raise AssertionError(f"Keys {missing_keys} not found in snapshot for {test_name}")
+            raise AssertionError(
+                f"Keys {missing_keys} not found in snapshot for {test_name}"
+            )
 
         # Verify all actual arrays are expected
         extra_keys = set(expected_arrays.keys()) - set(arrays_dict.keys())
         if extra_keys:
-            raise AssertionError(f"Snapshot contains extra keys {extra_keys} for {test_name}")
+            raise AssertionError(
+                f"Snapshot contains extra keys {extra_keys} for {test_name}"
+            )
 
         # Compare all arrays
         for key in arrays_dict:
@@ -111,7 +122,6 @@ class Snapshot:
 
         snapshot_path = self._get_snapshot_path(test_name)
 
-
         # Load the snapshot
         with open(snapshot_path, "rb") as f:
             expected_data = pickle.load(f)
@@ -119,12 +129,16 @@ class Snapshot:
         if isinstance(actual, dict):
             for key in actual:
                 if key not in expected_data:
-                    raise AssertionError(f"Key '{key}' not found in snapshot for {test_name}")
+                    raise AssertionError(
+                        f"Key '{key}' not found in snapshot for {test_name}"
+                    )
                 assert actual[key] == expected_data[key], (
                     f"Data for key '{key}' does not match snapshot for {test_name}"
                 )
         else:
-            assert actual == expected_data, f"Data does not match snapshot for {test_name}"
+            assert actual == expected_data, (
+                f"Data does not match snapshot for {test_name}"
+            )
 
 
 @pytest.fixture
@@ -149,7 +163,9 @@ def snapshot(request):
         # If test_name is not provided, use the test function name
         if test_name is None:
             test_name = request.node.name
-        return original_assert_match(actual, test_name=test_name, force_update=force_update)
+        return original_assert_match(
+            actual, test_name=test_name, force_update=force_update
+        )
 
     snapshot_handler.assert_match = patched_assert_match
 
@@ -177,13 +193,17 @@ def numpy_snapshot(request):
     # Patch the assert_match method to include the update flag by default
     original_assert_match = snapshot.assert_match
 
-    def patched_assert_match(actual, test_name=None, force_update=force_update, rtol=1e-4, atol=1e-2):
+    def patched_assert_match(
+        actual, test_name=None, force_update=force_update, rtol=1e-4, atol=1e-2
+    ):
         # If test_name is not provided, use the test function name
         if test_name is None:
             test_name = request.node.name
         if match_exact:
             rtol = atol = 0
-        return original_assert_match(actual, test_name=test_name, force_update=force_update, rtol=rtol, atol=atol)
+        return original_assert_match(
+            actual, test_name=test_name, force_update=force_update, rtol=rtol, atol=atol
+        )
 
     snapshot.assert_match = patched_assert_match
 
