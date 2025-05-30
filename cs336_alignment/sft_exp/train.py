@@ -15,7 +15,7 @@ from cs336_alignment.vllm import (
 import torch
 from tqdm import trange
 import wandb
-from cs336_alignment.sft_microbatch_train_step import sft_microbatch_train_step
+from cs336_alignment.sft_exp.sft_microbatch_train_step import sft_microbatch_train_step
 from cs336_alignment.utils import tokenize_prompt_and_output, get_response_log_probs
 from cs336_alignment.sft_exp.config.defaults import Config
 from cs336_alignment.drgrpo_grader import r1_zero_reward_fn

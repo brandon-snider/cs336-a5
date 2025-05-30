@@ -121,7 +121,7 @@ See `cs336_alignment/utils.py`
 
 == Problem (`sft_microbatch_train_step`): 3 points
 
-See `cs336_alignment/sft_microbatch_train_step.py`
+See `cs336_alignment/sft_exp/sft_microbatch_train_step.py`
 
 == Problem (`log_generations`): 2 points
 
@@ -146,5 +146,35 @@ TODO
 = 5 Expert Iteration for MATH
 
 == Problem (`expert_iteration_experiment`): 2 points
+
+TODO
+
+= 7 Group Relative Policy Optimization
+
+== Problem (`compute_group_normalized_rewards`): 2 points
+
+See `cs336_alignment/grpo_utils.py`
+
+== Problem (`compute_naive_policy_gradient_loss`): 1 point
+
+See `cs336_alignment/grpo_utils.py`
+
+== Problem (`compute_grpo_clip_loss`): 2 points
+
+See `cs336_alignment/grpo_utils.py`
+
+== Problem (`compute_policy_gradient_loss`): 1 point
+
+See `cs336_alignment/grpo_utils.py`
+
+== Problem (`masked_mean`): 1 point
+
+See `cs336_alignment/grpo_utils.py`
+
+== Problem (`grpo_microbatch_train_step`): 3 points
+
+TODO
+
+== Problem (`grpo_train_loop`): 5 points
 
 TODO

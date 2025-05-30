@@ -1,4 +1,4 @@
-ad[project]
+[project]
 name = "alignment"
 version = "1.0.0"
 description = "CS 336 Spring 2025 Assignment 5: Alignment"
@@ -23,6 +23,7 @@ dependencies = [
     "vllm==0.7.2",
     "wandb>=0.19.8",
     "xopen>=2.0.2",
+    "ty>=0.0.1a5",
 ]
 
 [tool.setuptools.packages.find]

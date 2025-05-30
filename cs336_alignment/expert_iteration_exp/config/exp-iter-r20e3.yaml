@@ -1,0 +1,6 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/expert-iteration-exp/exp-iter-r20e3
+
+training:
+  ei_rollouts_per_question: 20
+  sft_epochs_per_batch: 3
