@@ -1,0 +1,9 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/grpo-experiments/prompt_ablation/question_only
+  prompt_template_path: cs336_alignment/prompts/question_only.prompt
+
+training:
+  question_only: true
+  wandb_tags:
+    - grpo
+    - prompt-ablation

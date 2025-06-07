@@ -1,0 +1,9 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/grpo-experiments/baselines/no_baseline
+
+training:
+  loss_type: no_baseline
+  normalize_mode: mean
+  wandb_tags:
+    - grpo
+    - baselines

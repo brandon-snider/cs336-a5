@@ -123,9 +123,9 @@ See `cs336_alignment/utils.py`
 
 See `cs336_alignment/sft_exp/sft_microbatch_train_step.py`
 
-== Problem (`log_generations`): 2 points
+== Problem (`log_generations`): 1 point
 
-TODO
+See `log_generations` in `cs336_alignment/utils.py`
 
 == Problem (`sft_experiment`): 2 points
 
@@ -147,7 +147,13 @@ TODO
 
 == Problem (`expert_iteration_experiment`): 2 points
 
-TODO
+I find a significant improvement in the best validation accuracy using expert iteration over the best validation accuracy using SFT (0.494 vs. 0.4416). However, this was achieved over a run of almost two hours, whereas the SFT result was achieved in roughly 20 minutes.
+
+The shape of the improvement curve is quite similar to the SFT improvement curve, though it appears that expert iteration has a higher ceiling. The SFT curves were almost exactly flat by the end of each run, whereas expert iteration continued to gradually improve.
+
+#figure(image("images/ei-exp-accuracy.png"), caption: "Expert iteration validation accuracy curves")
+
+#figure(image("images/ei-exp-entropy.png"), caption: "Expert iteration token entropy curves")
 
 = 7 Group Relative Policy Optimization
 
@@ -173,8 +179,104 @@ See `cs336_alignment/grpo_utils.py`
 
 == Problem (`grpo_microbatch_train_step`): 3 points
 
-TODO
+See `cs336_alignment/grpo/grpo_microbatch_train_step.py`
 
 == Problem (`grpo_train_loop`): 5 points
 
-TODO
+See `cs336_alignment/grpo/train.py`
+
+#figure(image("images/grpo-train-loop-accuracy.png"), caption: "GRPO train loop: validation accuracy (first 50 steps)")
+
+Typical rollout from step 0 (multiple `<think>` tags and incorrect answer):
+
+```
+{"prompt":"A conversation between User and Assistant. The User asks a question, and the Assistant solves it. The Assistant first thinks about the reasoning process in the mind and then provides the User with the answer. The reasoning process is enclosed within <think> </think> and answer is enclosed within <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> <answer> answer here </answer>.\nUser: What is the remainder when 5462 is divided by 9?\nAssistant: <think>","completion":" The units digit of 5462 is 2. And there is an odd number of digits in this number. Then the sum of the digits of the obtained number by dividing 5462 by 9 results in <think> 2 </think>. The remainder in this case also results in <think> 2 </think>.</think> <answer> The remainder is 2 </answer>","ground_truth":"8","rewards":{}}
+```
+
+Example rollout from step 50 (correct format, incorrect answer):
+
+```
+{"prompt":"A conversation between User and Assistant. The User asks a question, and the Assistant solves it. The Assistant first thinks about the reasoning process in the mind and then provides the User with the answer. The reasoning process is enclosed within <think> </think> and answer is enclosed within <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> <answer> answer here </answer>.\nUser: What is the smallest possible perimeter, in units, of a triangle whose side-length measures are consecutive integer values?\nAssistant: <think>","completion":"To find the smallest possible perimeter, we need to consider the properties of triangles and the fact that the side lengths are consecutive integers. </think> <answer>6 </answer>","ground_truth":"9","rewards":{}}
+```
+
+Example rollout from step 50 (correct format, correct answer):
+
+```
+{"prompt":"A conversation between User and Assistant. The User asks a question, and the Assistant solves it. The Assistant first thinks about the reasoning process in the mind and then provides the User with the answer. The reasoning process is enclosed within <think> </think> and answer is enclosed within <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> <answer> answer here </answer>.\nUser: An assortment of 200 pencils is sold through a catalog for $\\$19.90$. Shipping is an additional $\\$6.95$. Including the charges for both the pencils and the shipping, what is the average cost, in cents, for each pencil? Express your answer rounded to the nearest whole number.\nAssistant: <think>","completion":"The cost for the pencils is \\$19.90 for 200 pencils, which is a cost of \\$0.0995 per pencil. Adding the shipping cost of \\$0.03475 per pencil, the total cost per pencil is \\$0.13425. Multiplying by 100 to convert to cents, the average cost per pencil is 13.425 cents. Rounding to the nearest whole number, the average cost per pencil is 13 cents.</think> <answer>13</answer>","ground_truth":"13","rewards":{}}
+```
+
+== Problem (`grpo_learning_rate`): 2 points
+
+#figure(image("images/grpo-lr-sweep.png"), caption: "GRPO learning rate sweep")
+
+The optimal learning rate in my sweep was `3e-5`, achieving a final validation accuracy of 37%.
+
+Above that, I saw significant instability (accuracy fluctuating throughout the run, or decreasing roughly monotonically).
+
+At `1e-6` I saw no improvement. At learning rates between `5e-6` and `3e-5`, I generally saw improving accuracy and stable training, though not always (even changing the random seed seemed to have a significant effect). I generally truncated these runs around 130 steps because they looked unlikely to outperform `3e-5`. After 130 steps, validation accuracy was between 7% (at `5e-6`) and 20% (at `2e-5`).
+
+I frequently observed entropy collapse. Entropy would start around 1.6, briefly shoot up after some number of steps, and then nearly vanish.
+
+My intuition is that entropy grows while the model is doing some exploration, and then collapses as the model settles in some local optimum. Of course, after entropy collapsees, the model is no longer exploring, so accuracy stops improving. Intuitively this is suboptimal given that it happens even when the model clearly has headroom to perform better on the task. For example, at `2e-5` I saw entropy collapse and improvement cease at an accuracy of \~25%, but I know from the fun at `3e-5` that 37% is possible at minimum. It seems like shaping the reward to encourage continued exploration could be useful.
+
+== Problem (`grpo_baselines`): 2 points
+
+#figure(image("images/grpo-baselines.png"), caption: "Validation accuracy curves with and without baselining")
+
+Using a baseline improved validation accuracy, and resulted in significantly different training dynamics. _With_ a baseline, gradients and training loss were vastly larger and noisier. Entropy also followed a very different curve, spiking early and then collapsing, rather than staying roughly constant as it did without a baseline.
+
+#figure(image("images/grpo-baselines-curves.png"), caption: "Metrics with and without baselining")
+
+== Problem (`think_about_length_normalization`): 1 point
+
+Normalizing by sequence length makes the per-sequence loss and per-sequence gradient contribution independent of the sequence length. Removing this normalization makes the loss and gradient contributions scale with the sequence length, such that the model is incentivized to produce longer correct answers (to maximize reward) and shorter incorrect answers (to minimize negative reward).
+
+Normalizing by sequence length can help with stability because every trajectory is renormalized to unit weight. Gradient norms stay in a narrower range even when sequence lengths vary widely.
+
+However, when we have outcome rewards and particularly want the policy to (i) value the extra reasoning tokens for correct answers (ii) de-vealue reasoning tokens that produce incorrect answers, constant normalizatioin (rather than sequence length normalization) makes sense.
+
+== Problem (`grpo_length_normalization`): 2 points
+
+#figure(image("images/grpo-length-normalization.png"), caption: "Validation accuracy: normalization by sequence length vs. normalization by constant")
+
+Dividing by a constant (the length of the longest generation) produces significantly better validation accuracy than normalizing by sequence length. The entropy curves also look different: normalizing by sequence length produces a larger early spike and deeper subsequenc collapse.
+
+#figure(image("images/grpo-length-normalization-entropy.png"), caption: "Entropy: normalization by sequence length vs. normalization by constant")
+
+== Problem (`grpo_group_standard_deviation`): 2 points
+
+#figure(image("images/grpo-group-std-dev.png"), caption: "Validation accuracy with and without std. dev. normalization")
+
+Normalizing the advantage by the standard deviation of the group's rewards made almost no difference to validaton accuracy. It did make some difference to gradient norms and entropy. Without std. dev. normalization, gradient norms were substantially smaller; entropy spiked significantly further, and subsequently collapsed significantly more deeply.
+
+#figure(image("images/grpo-group-std-dev-norm.png"), caption: "Entropy with and without std. dev. normalization")
+
+#figure(image("images/grpo-group-std-dev-entropy.png"), caption: "Entropy with and without std. dev. normalization")
+
+== Problem (`grpo_off_policy_sweep`): 4 points
+
+For the short runs (50 steps), I initially swept over 1, 2, and 4 epochs, with batch sizes of 16, 32, 64, 128, and 256, stopping early whenever it became clear that a configuration was suboptimal (e.g. divergence). I was not able to improve on the default on-policy configuration of 1 epoch with a batch size of 256.
+
+I frequently saw divergence with batch sizes of 16 and 32. For all the runs that used more than 1 epoch, I saw slower improvements in accuracy. I was not able to discern any reliable pattern in entropy curves except that, in all cases, entropy shrank over the course of the run. In some cases, entropy grew early in the run and then shrank; in others, it shrank immediately, but this is not obviously correlated with either the number of epochs or the train batch size in my experiments.
+
+Per eval step, the original configuration (1 epoch, batch size 256) significantly outperformed all others. Against wall clock time, using a smaller batch size (still 1 epoch) came close, but was still suboptimal.
+
+#figure(image("images/grpo-off-policy-wall-clock.png"), caption: "GRPO off-policy sweep: validation accuracy vs. wall clock time")
+
+#figure(image("images/grpo-off-policy-eval-step.png"), caption: "GRPO off-policy sweep: validation accuracy vs. eval step")
+
+== Problem (`grpo_off_policy_clip_ablation`): 2 points
+
+#figure(image("images/grpo-no-clip.png"), caption: "GRPO off-policy without clipping")
+
+#figure(image("images/grpo-with-clip.png"), caption: "GRPO off-policy with clipping")
+
+Without clipping, I found training to be less stable. The gradient norms blew up after a few dozen steps, and there were occasional loss spikes. Entropy fluctuated, but seemed to grow over the course of the run when not clipping.
+
+== Problem (`grpo_prompt_ablation`): 2 points
+
+The question-only prompt significantly outperforms the R1-Zero prompt. The answer reward starts higher, but also continues to improve throughout training rather than plateauing after fast initial improvement, which happens with the R1-Zero prompt.
+
+Training with the question-only prompt also seems much more stable. Gradient norms are much smaller, entropy shrinks very slowly (rather than spiking and/or collapsing), and the loss remains relatively stable throughout training.
+
+#figure(image("images/grpo-question-only.png"), caption: "GRPO prompt ablation: validation accuracy")

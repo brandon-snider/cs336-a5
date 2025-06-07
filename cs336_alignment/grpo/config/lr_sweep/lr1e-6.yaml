@@ -1,0 +1,9 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/grpo-experiments/lr1e-6
+
+training:
+  learning_rate: 1e-6
+  normalize_mode: mean
+  wandb_tags:
+    - grpo
+    - lr-sweep

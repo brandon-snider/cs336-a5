@@ -1,0 +1,8 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/grpo-experiments/group_std_dev/no_std_dev
+
+training:
+  use_std_normalization: False
+  wandb_tags:
+    - grpo
+    - group_std_dev

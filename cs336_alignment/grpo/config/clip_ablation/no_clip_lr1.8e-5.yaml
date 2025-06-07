@@ -1,0 +1,9 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/grpo-experiments/clip_ablation/no_clip_lr1.8e-5
+
+training:
+  loss_type: grpo_no_clip
+  learning_rate: 1.8e-5
+  wandb_tags:
+    - grpo
+    - clip-ablation

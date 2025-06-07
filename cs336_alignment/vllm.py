@@ -38,6 +38,7 @@ def evaluate_vllm(
     out_dir: str | None = "out",
     out_file: str | None = None,
     write: bool = True,
+    min_tokens: int = 0,
 ) -> tuple[list[EvalResult], EvalMetrics]:
     """
     Eval LM on prompts, compute eval metrics, optionally serialize to disk, return evaluation results.
@@ -45,6 +46,7 @@ def evaluate_vllm(
     sampling_params = eval_sampling_params or SamplingParams(
         temperature=1.0,
         top_p=1.0,
+        min_tokens=min_tokens,
         max_tokens=1024,
         stop=["</answer>"],
         include_stop_str_in_output=True,

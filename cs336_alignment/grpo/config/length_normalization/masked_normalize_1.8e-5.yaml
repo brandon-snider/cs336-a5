@@ -1,0 +1,9 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/grpo-experiments/length_normalization/masked_normalize_1.8e-5
+
+training:
+  learning_rate: 1.8e-5
+  normalize_mode: constant
+  wandb_tags:
+    - grpo
+    - length_normalization

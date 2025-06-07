@@ -45,3 +45,8 @@ log_cli_level = "WARNING"
 name = "flash-attn"
 version = "2.7.4.post1"
 requires-dist = ["torch", "einops", "setuptools"]
+
+[tool.uv.workspace]
+members = [
+    "art_exp",
+]

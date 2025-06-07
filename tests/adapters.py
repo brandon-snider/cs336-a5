@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, Callable, Literal
 
+from cs336_alignment.grpo.grpo_microbatch_train_step import grpo_microbatch_train_step
 import torch
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -275,7 +276,16 @@ def run_grpo_microbatch_train_step(
         tuple[torch.Tensor, dict[str, torch.Tensor]]:
             the policy gradient loss and its metadata.
     """
-    raise NotImplementedError
+    return grpo_microbatch_train_step(
+        policy_log_probs,
+        response_mask,
+        gradient_accumulation_steps,
+        loss_type,
+        raw_rewards,
+        advantages,
+        old_log_probs,
+        cliprange,
+    )
 
 
 def run_masked_normalize(

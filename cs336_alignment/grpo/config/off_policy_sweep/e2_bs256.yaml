@@ -1,0 +1,12 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/grpo-experiments/off_policy_sweep/e2_bs_256
+
+training:
+  n_grpo_steps: 50
+  gradient_accumulation_steps: 128
+  epochs_per_rollout_batch: 2
+  train_batch_size: 256
+  loss_type: grpo_clip
+  wandb_tags:
+    - grpo
+    - off-policy-sweep
