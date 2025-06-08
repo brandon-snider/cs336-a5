@@ -5,6 +5,7 @@ from pathlib import Path
 import random
 import submitit
 from omegaconf import OmegaConf
+from vllm import SamplingParams
 
 from cs336_alignment.grpo_utils import compute_group_normalized_rewards
 from cs336_alignment.vllm import (
@@ -53,9 +54,6 @@ def main(cfg: Config):
 
     assert cfg.training.train_batch_size >= cfg.training.group_size, (
         "train_batch_size must be greater than or equal to group_size"
-    )
-    n_microbatches_per_rollout_batch = (
-        cfg.training.rollout_batch_size // micro_train_batch_size
     )
 
     if torch.cuda.is_available():
@@ -204,11 +202,20 @@ def main(cfg: Config):
             f"Generating {cfg.training.group_size} * {n_prompts_per_rollout_batch:,} = {len(repeated_rollout_prompts):,} rollouts for GRPO step {grpo_step}..."
         )
 
+        sampling_params = SamplingParams(
+            temperature=cfg.training.sampling_temperature,
+            top_p=cfg.training.sampling_top_p,
+            max_tokens=cfg.training.sampling_max_tokens,
+            stop=["</answer>"],
+            include_stop_str_in_output=True,
+            min_tokens=cfg.training.sampling_min_tokens,
+        )
+
         # Generate rollouts
         load_policy_into_vllm_instance(model, vllm_model)
         grpo_batch_outputs = vllm_model.generate(
             repeated_rollout_prompts,
-            default_sampling_params,
+            sampling_params,
         )
 
         rollout_responses = [output.outputs[0].text for output in grpo_batch_outputs]
@@ -265,12 +272,12 @@ def main(cfg: Config):
             device=cfg.training.device,
         )
 
-        # Get old log probs
-        logger.info("Getting old log probs...")
-
         old_log_probs = None
 
         if cfg.training.loss_type in ("grpo_clip", "grpo_no_clip"):
+            # Get old log probs
+            logger.info("Getting old log probs...")
+
             old_log_probs_tensors = []
 
             for batch_idx in range(

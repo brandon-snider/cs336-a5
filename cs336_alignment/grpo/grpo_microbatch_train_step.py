@@ -15,7 +15,7 @@ def grpo_microbatch_train_step(
     advantages: torch.Tensor | None = None,
     old_log_probs: torch.Tensor | None = None,
     cliprange: float | None = None,
-    normalize_mode: Literal["mean", "constant"] = "mean",
+    normalize_mode: Literal["mean", "constant", "microbatch"] = "mean",
     normalize_constant: float | None = None,
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
     policy_gradient_loss, meta = compute_policy_gradient_loss(
@@ -32,18 +32,18 @@ def grpo_microbatch_train_step(
             masked_mean(policy_gradient_loss, response_mask, dim=-1).mean()
             / gradient_accumulation_steps
         )
-    elif normalize_mode == "constant":
+    elif normalize_mode in ["constant", "microbatch"]:
         assert normalize_constant is not None
+
+        if normalize_mode == "constant":
+            constant = normalize_constant
+        elif normalize_mode == "microbatch":
+            # Normalize by longest sequence in microbatch
+            constant = response_mask.sum(dim=-1).max().item()
 
         loss = (
             masked_normalize(
-                policy_gradient_loss,
-                response_mask,
-                # normalize_constant,
-                response_mask.sum(dim=-1)
-                .max()
-                .item(),  # TODO: Should be over whole batch, not microbatch
-                dim=-1,
+                policy_gradient_loss, response_mask, constant, dim=-1
             ).mean()
             / gradient_accumulation_steps
         )

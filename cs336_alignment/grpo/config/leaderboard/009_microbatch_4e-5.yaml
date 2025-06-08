@@ -1,0 +1,10 @@
+paths:
+  model_output: /data/c-sniderb/a5-alignment/leaderboard/009_microbatch_4e-5
+
+training:
+  learning_rate: 4e-5
+  n_grpo_steps: 50
+  normalize_mode: "microbatch"
+  wandb_tags:
+    - grpo
+    - leaderboard

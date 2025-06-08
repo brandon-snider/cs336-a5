@@ -34,6 +34,7 @@ class TrainingConfig:
     sampling_temperature: float = 1.0
     sampling_min_tokens: int = 4  # As in Expiter, disallow empty string responses
     sampling_max_tokens: int = 1024
+    sampling_top_p: float = 1.0
 
     gpu_memory_utilization: float = 0.2
 
@@ -44,6 +45,7 @@ class TrainingConfig:
 
     # - "mean" (div. each by seq's adv. by it's seq. len)
     # - "constant" (divide all seq adv. by max seq. len)
+    # - "microbatch" (divide all seq adv. by longest seq. in microbatch)
     normalize_mode: str = "constant"
 
     max_grad_norm: float = 1.0
